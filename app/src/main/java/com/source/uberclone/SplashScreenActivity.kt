@@ -16,6 +16,7 @@ import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import android.view.View
 import com.source.uberclone.utils.Constants
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -23,6 +24,7 @@ import androidx.appcompat.app.AlertDialog
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.database.ValueEventListener
 import com.source.uberclone.models.DriverInfoModel
+import com.source.uberclone.ui.HomeActivity
 
 class SplashScreenActivity : AppCompatActivity() {
 
@@ -117,7 +119,8 @@ class SplashScreenActivity : AppCompatActivity() {
                 .addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         if (snapshot.exists()) {
-                            Toast.makeText(this@SplashScreenActivity, "User already registered", Toast.LENGTH_SHORT).show()
+                            val model = snapshot.getValue(DriverInfoModel::class.java)
+                            goToHomeActivity(model)
 
                         } else{
                             showRegisterLayout()
@@ -131,6 +134,13 @@ class SplashScreenActivity : AppCompatActivity() {
 
                 })
         }
+    private fun goToHomeActivity(model: DriverInfoModel?) {
+        Constants.currentUser = model
+        startActivity(Intent(this@SplashScreenActivity, HomeActivity::class.java))
+        finish()
+    }
+
+
     private fun showRegisterLayout(){
         val builder = AlertDialog.Builder(this, R.style.DialogTheme)
         val itemView = LayoutInflater.from(this).inflate(R.layout.register_layout, null)
@@ -182,8 +192,9 @@ class SplashScreenActivity : AppCompatActivity() {
                         Toast.makeText(this@SplashScreenActivity, "Register Successfully", Toast.LENGTH_SHORT)
                             .show()
                         dialog.dismiss()
-                        firebaseAuthUI.signOut()
-                        finish()
+
+                        goToHomeActivity(model)
+                        progressBar.visibility = View.GONE
                     }
             }
         }
