@@ -12,12 +12,22 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.source.uberclone.R
+import com.source.uberclone.SplashScreenActivity
+import androidx.appcompat.app.AlertDialog
+import com.google.firebase.auth.FirebaseAuth
+import android.content.Intent
+import android.widget.TextView
+import androidx.navigation.NavController
 import com.source.uberclone.databinding.ActivityHomeBinding
+import com.source.uberclone.utils.Constants
 
 class HomeActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityHomeBinding
+    private lateinit var navView: NavigationView
+    private lateinit var drawerLayout: DrawerLayout
+    private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,8 +44,10 @@ class HomeActivity : AppCompatActivity() {
                 .show()
         }
 
-        val drawerLayout: DrawerLayout = binding.drawerLayout
-        val navView: NavigationView = binding.navView
+        drawerLayout = binding.drawerLayout
+        navView = binding.navView
+        init()
+
         val navController = findNavController(R.id.nav_host_fragment_content_home)
 
         appBarConfiguration = AppBarConfiguration(
@@ -48,6 +60,45 @@ class HomeActivity : AppCompatActivity() {
 
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        init()
+
+    }
+
+    private fun init() {
+        navView.setNavigationItemSelectedListener { it ->
+            val  builder = AlertDialog.Builder(this@HomeActivity)
+            builder.setTitle("Are you sure you want to exit?")
+                .setNegativeButton("No"){dialogue, _ -> dialogue.dismiss()}
+                .setPositiveButton("SIGN OUT") { dialogue, _ ->
+                    finish()
+                    FirebaseAuth.getInstance().signOut()
+                    val intent = Intent(this@HomeActivity, SplashScreenActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                    finish()
+                }.setCancelable(false)
+
+            val dialog = builder.create()
+            dialog.setOnShowListener {
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                    .setTextColor(resources.getColor(android.R.color.holo_red_dark))
+                dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+                    .setTextColor(resources.getColor(R.color.colorAccent))
+            }
+            dialog.show()
+            true
+        }
+        val headerView = navView.getHeaderView(0)
+        val textName = headerView.findViewById<TextView>(R.id.text_view_name)
+        val textViewStar = headerView.findViewById<TextView>(R.id.text_view_rating)
+        val textPhone = headerView.findViewById<TextView>(R.id.text_view_phone)
+
+        textName.text = Constants.buildWelcomeMessage()
+        textViewStar.text = java.lang.String.valueOf(Constants.currentUser?.rating)
+        textPhone.text = Constants.currentUser?.phoneNumber
+
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
