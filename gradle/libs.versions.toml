@@ -19,6 +19,8 @@ materialVersion = "1.11.0"
 navigationFragmentKtx = "2.9.6"
 playServicesMaps = "20.0.0"
 googleAndroidLibrariesMapsplatformSecretsGradlePlugin = "2.0.1"
+firebaseStorage = "22.0.1"
+firebaseMessaging = "25.0.1"
 
 [libraries]
 androidx-appcompat-v161 = { module = "androidx.appcompat:appcompat", version.ref = "appcompatVersion" }
@@ -40,6 +42,8 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
 material-v1110 = { module = "com.google.android.material:material", version.ref = "materialVersion" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
+firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

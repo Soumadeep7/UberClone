@@ -3,6 +3,7 @@ package com.source.uberclone
 import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.EditText
@@ -21,10 +22,15 @@ import com.source.uberclone.utils.Constants
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import androidx.appcompat.app.AlertDialog
+import com.example.uberclone.utils.UserUtils
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.messaging.FirebaseMessaging
 import com.source.uberclone.models.DriverInfoModel
 import com.source.uberclone.ui.HomeActivity
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 
 class SplashScreenActivity : AppCompatActivity() {
 
@@ -45,6 +51,18 @@ class SplashScreenActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash_screen)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                requestPermissions(
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    101
+                )
+            }
+        }
+
         init()
 
         progressBar = findViewById(R.id.progress_bar)
@@ -88,6 +106,20 @@ class SplashScreenActivity : AppCompatActivity() {
         listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
             val user = firebaseAuth.currentUser
             if (user != null) {
+
+                FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val token = task.result
+                        UserUtils.updateToken(this@SplashScreenActivity, token)
+                        Log.d("Token", token)
+                    } else {
+                        Toast.makeText(
+                            this@SplashScreenActivity,"Failed to get FCM token ${task.exception?.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+
                 checkUserFromFireBase()
             } else {
                 showLoginLayout()
@@ -180,7 +212,8 @@ class SplashScreenActivity : AppCompatActivity() {
                     edit_text_name.text.toString(),
                     edit_text_last_name.text.toString(),
                     edit_text_phone_number.text.toString(),
-                    0.0
+                    0.0,
+                    ""
                 )
 
                 driverInfoRef.child(FirebaseAuth.getInstance().currentUser!!.uid)
